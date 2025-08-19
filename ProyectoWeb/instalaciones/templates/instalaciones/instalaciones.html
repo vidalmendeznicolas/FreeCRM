@@ -1,0 +1,119 @@
+<!-- Heredar de la plantilla base -->
+{% extends "proyectoWebApp/base.html" %}
+
+<!-- Cargar todo el contenido de la carpeta static(imagenes,css,etc..) -->
+{% load static %}
+
+<!--bloque de contenido cambiante que se va a aplicar-->
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="hero-subtitle">Conoce</span>
+                        <span class="hero-main-title">Nuestras Instalaciones</span>
+                    </h1>
+                    <p class="hero-description">
+                        Disfruta de modernas instalaciones diseñadas para maximizar tu aprendizaje. 
+                        Aulas equipadas, espacios de estudio y tecnología de vanguardia a tu disposición.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ instalaciones|length }}</div>
+                            <div class="stat-label">Instalaciones</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Equipadas</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">Disponibles</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image">
+                    <img class="img-fluid rounded shadow-lg" src="{% static 'proyectoWebApp/img/principal.jpg' %}" alt="Instalaciones Centro de Estudios">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Facilities Section -->
+{% if instalaciones %}
+<section class="facilities-section">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title">
+                <span class="section-subtitle">Todas nuestras</span>
+                <span class="section-main-title">Instalaciones</span>
+            </h2>
+            <p class="section-description">Conoce las modernas instalaciones donde aprenderás</p>
+        </div>
+        
+        <div class="row">
+            {% for instalacion in instalaciones %}
+            <div class="col-lg-6 col-md-12 mb-4">
+                <div class="facility-card">
+                    <div class="facility-image">
+                        <img src="{{ instalacion.imagen.url }}" alt="{{ instalacion.titulo }}" class="img-fluid">
+                    </div>
+                    <div class="facility-content">
+                        <h3 class="facility-title">{{ instalacion.titulo }}</h3>
+                        <p class="facility-description">{{ instalacion.contenido }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Commitment Section -->
+<section class="commitment-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="commitment-card">
+                    <div class="commitment-icon">
+                        <i class="fa fa-star"></i>
+                    </div>
+                    <h2 class="commitment-title">
+                        <span class="commitment-subtitle">Compromiso total</span>
+                        <span class="commitment-main-title">Garantizado</span>
+                    </h2>
+                    <p class="commitment-description">
+                        Con más de 10 años de experiencia a nuestras espaldas, desde asignaturas de primaria, 
+                        tenemos los conocimientos y herramientas necesarios para llevar cualquier alumno al 
+                        estrellato con puntualidad y profesionalidad.
+                    </p>
+                    <div class="commitment-features">
+                        <div class="feature-item">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Instalaciones modernas</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Tecnología avanzada</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Espacios confortables</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+

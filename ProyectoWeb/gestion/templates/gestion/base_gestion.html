@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Sistema de Gestión - Esquemas Centro de Estudios{% endblock %}</title>
+    {% load static %}
+
+    <!-- Bootstrap -->
+    <link href="{% static 'proyectoWebApp/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link href="{% static 'proyectoWebApp/css/gestion.css' %}" rel="stylesheet">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Raleway', sans-serif;
+        }
+        
+        .gestion-header {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .gestion-sidebar {
+            background-color: #2c3e50;
+            min-height: 100vh;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+        }
+        
+        .gestion-sidebar .nav-link {
+            color: #bdc3c7;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            margin-bottom: 0.25rem;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+        
+        .gestion-sidebar .nav-link:hover {
+            color: #fff;
+            background-color: rgba(255,255,255,0.1);
+            border-left-color: #3498db;
+        }
+        
+        .gestion-sidebar .nav-link.active {
+            color: #fff;
+            background-color: #3498db;
+            border-left-color: #2980b9;
+        }
+        
+        .main-content {
+            padding: 2rem;
+        }
+        
+        .gestion-card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: box-shadow 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .gestion-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .gestion-card .card-header {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border-radius: 10px 10px 0 0 !important;
+            border: none;
+        }
+        
+        .btn-gestion {
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-gestion:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .user-info {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .logout-btn {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border: none;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: white;
+        }
+        
+        .breadcrumb-gestion {
+            background: transparent;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .breadcrumb-gestion .breadcrumb-item a {
+            color: #6c757d !important;
+            text-decoration: none;
+        }
+        
+        .breadcrumb-gestion .breadcrumb-item a:hover {
+            color: #fff !important;
+        }
+        
+        .breadcrumb-gestion .breadcrumb-item.active {
+            color: #fff !important;
+        }
+        
+        .stats-mini {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stats-mini h4 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        
+        .stats-mini p {
+            margin-bottom: 0;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="gestion-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="h3 mb-0">
+                        <i class="fa fa-cogs"></i> 
+                        Sistema de Gestión Académica
+                    </h1>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-user"></i> {{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{% url 'gestion:inicio' %}">
+                                <i class="fa fa-home"></i> Inicio
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'login:logout' %}">
+                                <i class="fa fa-sign-out"></i> Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block gestion-sidebar">
+                <div class="position-sticky pt-3">
+                    <div class="user-info text-center">
+                        <i class="fa fa-user-circle fa-3x text-white mb-2"></i>
+                        <h6 class="text-white">{{ user.username }}</h6>
+                        <small class="text-muted">{{ user.email|default:"Administrador" }}</small>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link {% if request.path == '/gestion/' %} active {% endif %}" href="{% url 'gestion:inicio' %}">
+                                <i class="fa fa-home"></i> Inicio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'alumnos' in request.path %} active {% endif %}" href="{% url 'gestion:alumnos' %}">
+                                <i class="fa fa-users"></i> Alumnos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'pagos' in request.path %} active {% endif %}" href="{% url 'gestion:pagos' %}">
+                                <i class="fa fa-credit-card"></i> Pagos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'gastos' in request.path %} active {% endif %}" href="{% url 'gestion:gastos' %}">
+                                <i class="fa fa-money-bill-wave"></i> Gastos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'horarios' in request.path %} active {% endif %}" href="{% url 'gestion:horarios' %}">
+                                <i class="fa fa-calendar"></i> Horarios
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                                        <a class="nav-link {% if 'sesiones' in request.path %} active {% endif %}" href="{% url 'gestion:sesiones' %}">
+              <i class="fa fa-calendar"></i> Sesiones
+            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'reportes' in request.path %} active {% endif %}" href="{% url 'reportes:reportes' %}">
+                                <i class="fa fa-chart-bar"></i> Reportes
+                            </a>
+                        </li>
+                        <li class="nav-item mt-3">
+                            <a class="nav-link logout-btn" href="{% url 'login:logout' %}">
+                                <i class="fa fa-sign-out"></i> Cerrar Sesión
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb" class="mb-4">
+                    <ol class="breadcrumb breadcrumb-gestion">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'gestion:inicio' %}">
+                                <i class="fa fa-home"></i> Gestión
+                            </a>
+                        </li>
+                        {% block breadcrumb %}
+                        <li class="breadcrumb-item active" aria-current="page">Inicio</li>
+                        {% endblock %}
+                    </ol>
+                </nav>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block content %}
+                <!-- El contenido específico de cada página irá aquí -->
+                {% endblock %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="{% static 'proyectoWebApp/vendor/jquery/jquery.min.js' %}"></script>
+    <script src="{% static 'proyectoWebApp/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <!-- Scripts adicionales específicos de gestión -->
+    {% block extra_js %}
+    {% endblock %}
+</body>
+</html> 

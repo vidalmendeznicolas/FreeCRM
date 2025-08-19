@@ -1,0 +1,302 @@
+{% extends 'gestion/base_gestion.html' %}
+{% load static %}
+
+{% block title %}Gestión de Horarios{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'gestion:inicio' %}">Inicio</a></li>
+<li class="breadcrumb-item active" aria-current="page">Horarios</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+  <!-- Filtros -->
+  <div class="card mb-3">
+    <div class="card-header bg-white">
+      <i class="fa fa-search me-2"></i> Filtros
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">Buscar</label>
+          <input type="text" name="q" value="{{ filters.q }}" placeholder="Asignatura, aula o profesor" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Profesor</label>
+          <select name="profesor" class="form-select">
+            <option value="">Todos</option>
+            {% for profesor in profesores %}
+            <option value="{{ profesor.id }}" {% if filters.profesor == profesor.id|stringformat:"s" %}selected{% endif %}>
+              {{ profesor.user.get_full_name|default:profesor.user.username }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Día</label>
+          <select name="dia" class="form-select">
+            <option value="">Todos</option>
+            <option value="0" {% if filters.dia == '0' %}selected{% endif %}>Lunes</option>
+            <option value="1" {% if filters.dia == '1' %}selected{% endif %}>Martes</option>
+            <option value="2" {% if filters.dia == '2' %}selected{% endif %}>Miércoles</option>
+            <option value="3" {% if filters.dia == '3' %}selected{% endif %}>Jueves</option>
+            <option value="4" {% if filters.dia == '4' %}selected{% endif %}>Viernes</option>
+            <option value="5" {% if filters.dia == '5' %}selected{% endif %}>Sábado</option>
+            <option value="6" {% if filters.dia == '6' %}selected{% endif %}>Domingo</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Estado</label>
+          <select name="activo" class="form-select">
+            <option value="">Todos</option>
+            <option value="activo" {% if filters.activo == 'activo' %}selected{% endif %}>Activos</option>
+            <option value="inactivo" {% if filters.activo == 'inactivo' %}selected{% endif %}>Inactivos</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Horario específico</label>
+          <select name="horario" class="form-select">
+            <option value="">Todos los horarios</option>
+            {% for horario in todos_horarios %}
+            <option value="{{ horario.id }}" {% if filters.horario == horario.id|stringformat:"s" %}selected{% endif %}>
+              {{ horario.asignatura }} - {{ horario.get_dia_semana_display }} {{ horario.hora_inicio|time:"H:i" }}-{{ horario.hora_fin|time:"H:i" }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-primary"><i class="fa fa-filter"></i> Filtrar</button>
+        </div>
+        <div class="col-md-1 d-grid">
+          <a href="{% url 'gestion:horarios' %}" class="btn btn-outline-secondary"><i class="fa fa-times"></i></a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Estadísticas generales -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-3">
+      <div class="card stats-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Total horarios</h6>
+              <h3 class="mb-0">{{ total_horarios }}</h3>
+            </div>
+            <i class="fa fa-clock fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-success">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Horarios activos</h6>
+              <h3 class="mb-0">{{ horarios_activos }}</h3>
+            </div>
+            <i class="fa fa-check-circle fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-info">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Mes actual</h6>
+              <h3 class="mb-0">{{ mes_actual }}/{{ año_actual }}</h3>
+            </div>
+            <i class="fa fa-calendar fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-warning">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Sesiones este mes</h6>
+              <h3 class="mb-0">{{ sesiones_este_mes }}</h3>
+            </div>
+            <i class="fa fa-calendar-day fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de horarios -->
+  <div class="card table-gestion">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <span><i class="fa fa-clock me-2"></i> Horarios</span>
+      <div class="d-flex align-items-center gap-2">
+        <a href="/admin/gestion/horario/add/?_redirect={{ request.path|urlencode }}" class="btn btn-success btn-sm">
+          <i class="fa fa-plus"></i> Nuevo Horario
+        </a>
+        <small class="text-muted">{{ horarios|length }} registros</small>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Asignatura</th>
+            <th>Día</th>
+            <th>Hora</th>
+            <th>Profesor</th>
+            <th>Aula</th>
+            <th>Alumnos</th>
+            <th>Ocupación</th>
+            <th>Sesiones ({{ mes_actual }}/{{ año_actual }})</th>
+            <th>Próxima sesión</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stats in horarios %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar-sm me-2">
+                  <i class="fa fa-book fa-lg text-primary"></i>
+                </div>
+                <div>
+                  <strong>{{ stats.horario.asignatura }}</strong>
+                  {% if stats.horario.capacidad > 0 %}
+                  <br>
+                  <small class="text-muted">Capacidad: {{ stats.horario.capacidad }}</small>
+                  {% endif %}
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge bg-secondary">{{ stats.horario.get_dia_semana_display }}</span>
+            </td>
+            <td>
+              <strong>{{ stats.horario.hora_inicio|time:"H:i" }} - {{ stats.horario.hora_fin|time:"H:i" }}</strong>
+            </td>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar-sm me-2">
+                  <i class="fa fa-user-tie fa-lg text-info"></i>
+                </div>
+                <div>
+                  {{ stats.horario.profesor.user.get_full_name|default:stats.horario.profesor.user.username }}
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if stats.horario.aula %}
+                <span class="badge bg-light text-dark">{{ stats.horario.aula }}</span>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-primary">{{ stats.alumnos_matriculados }} alumnos</span>
+            </td>
+            <td>
+              {% if stats.horario.capacidad > 0 %}
+                <div class="d-flex flex-column">
+                  <div class="progress mb-1" style="height: 6px;">
+                    <div class="progress-bar {% if stats.ocupacion > 80 %}bg-danger{% elif stats.ocupacion > 60 %}bg-warning{% else %}bg-success{% endif %}" 
+                         style="width: {{ stats.ocupacion }}%"></div>
+                  </div>
+                  <small class="text-muted">{{ stats.ocupacion }}%</small>
+                </div>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="d-flex flex-column">
+                <span class="badge bg-info">{{ stats.sesiones_este_mes }} sesiones</span>
+                {% if stats.sesiones_este_mes > 0 %}
+                  <small class="text-muted">{{ stats.asistencias_este_mes }} asistencias</small>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              {% if stats.proxima_sesion %}
+                <small>{{ stats.proxima_sesion.inicio|date:"d/m/Y" }}</small>
+                <br>
+                <small class="text-muted">{{ stats.proxima_sesion.inicio|time:"H:i" }}</small>
+              {% else %}
+                <small class="text-muted">Sin sesiones</small>
+              {% endif %}
+            </td>
+            <td>
+              {% if stats.horario.activo %}
+                <span class="badge bg-success">Activo</span>
+              {% else %}
+                <span class="badge bg-danger">Inactivo</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <a href="/admin/gestion/horario/{{ stats.horario.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-outline-primary" title="Editar">
+                  <i class="fa fa-edit"></i>
+                </a>
+                <a href="/admin/gestion/sesion/add/?horario={{ stats.horario.id }}&_redirect={{ request.path|urlencode }}" class="btn btn-outline-success" title="Crear sesión">
+                  <i class="fa fa-calendar-plus"></i>
+                </a>
+                <a href="{% url 'gestion:detalle_horario' stats.horario.id %}" class="btn btn-outline-info" title="Ver detalles">
+                  <i class="fa fa-eye"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="11" class="text-center text-muted py-4">
+              <i class="fa fa-clock fa-3x mb-3"></i>
+              <br>
+              No hay horarios que coincidan con los filtros actuales.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+.avatar-sm {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress {
+  background-color: #f8f9fa;
+}
+
+.btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.stats-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+</style>
+{% endblock %} 

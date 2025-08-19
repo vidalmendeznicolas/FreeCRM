@@ -1,0 +1,54 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Función para pre-llenar las horas cuando se selecciona un horario
+    function initializeHorarioHandler() {
+        const horarioField = document.querySelector('#id_horario');
+        if (!horarioField) return;
+        
+        // Escuchar cambios en el campo de horario
+        horarioField.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption && selectedOption.text) {
+                prefillHoras(selectedOption.text);
+            }
+        });
+    }
+    
+    // Función para pre-llenar las horas
+    function prefillHoras(horarioText) {
+        const timeMatch = horarioText.match(/(\d{1,2}):(\d{2}):(\d{2})-(\d{1,2}):(\d{2}):(\d{2})/);
+        
+        if (timeMatch) {
+            const horaInicio = timeMatch[1] + ':' + timeMatch[2];
+            const horaFin = timeMatch[4] + ':' + timeMatch[5];
+            
+            // Obtener la fecha actual
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const fechaActual = year + '-' + month + '-' + day;
+            
+            // Pre-llenar los campos de fecha y hora
+            const inicioDateField = document.querySelector('#id_inicio_0');
+            const inicioTimeField = document.querySelector('#id_inicio_1');
+            const finDateField = document.querySelector('#id_fin_0');
+            const finTimeField = document.querySelector('#id_fin_1');
+            
+            if (inicioDateField) inicioDateField.value = fechaActual;
+            if (inicioTimeField) inicioTimeField.value = horaInicio;
+            if (finDateField) finDateField.value = fechaActual;
+            if (finTimeField) finTimeField.value = horaFin;
+        }
+    }
+    
+    // Inicializar cuando se carga la página
+    initializeHorarioHandler();
+});
+</script>
+{% endblock %} 

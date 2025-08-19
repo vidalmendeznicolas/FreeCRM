@@ -1,0 +1,48 @@
+<!-- Heredar de la plantilla base -->
+{% extends "proyectoWebApp/base.html" %}
+
+<!-- Cargar todo el contenido de la carpeta static(imagenes,css,etc..) -->
+{% load static %}
+
+<!--bloque de contenido cambiante que se va a aplicar-->
+{% block content %}
+
+{% for post in post %}
+
+<section class="page-section clearfix">
+  <div class="container">
+    <div class="intro">
+      <img class="intro-img img-fluid mb-3 mb-lg-0 rounded" src="{{post.imagen.url}}" alt="" style="width: 65%;">
+      <div class="intro-text left-0 text-center bg-faded p-5 rounded">
+        <h2 class="section-heading mb-4" >
+          <span class="section-heading-lower" style="color:black">{{post.titulo}}</span>
+          <span class="section-heading-upper">{{post.contenido}}</span>
+        </h2>
+
+        <div style="text-align: left; font-size: 0.8em;">
+          Autor: {{post.autor}}
+          <br>
+          Categoría: {{post.categorias}}
+          <br>
+          Fecha: {{post.created}}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endfor %}
+<section>
+  <div style="width: 75%; margin: auto; text-align: center; color: white;">
+    Categorías:  &nbsp;
+
+    {% for post in post %}
+      {% for categoria in post.categorias.all %}
+        {{categoria.nombre}} &nbsp;&nbsp;&nbsp;
+      {% endfor %}
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
+

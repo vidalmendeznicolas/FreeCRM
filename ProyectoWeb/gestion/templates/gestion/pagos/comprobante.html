@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Comprobante de Pago {{ pago.numero }}</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 2cm;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #667eea;
+            margin: 0;
+            font-size: 24px;
+        }
+        .header p {
+            margin: 5px 0;
+            color: #666;
+        }
+        .comprobante-info {
+            margin-bottom: 30px;
+        }
+        .comprobante-info h2 {
+            color: #667eea;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        .info-label {
+            font-weight: bold;
+            width: 120px;
+            color: #555;
+        }
+        .info-value {
+            flex: 1;
+        }
+        .pago-details {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .qr-placeholder {
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>ESQUEMAS</h1>
+        <p>Centro de Estudios</p>
+        <p>Comprobante de Pago</p>
+    </div>
+
+    <div class="comprobante-info">
+        <h2>Información del Pago</h2>
+        
+        <div class="info-row">
+            <div class="info-label">Número:</div>
+            <div class="info-value">{{ pago.numero }}</div>
+        </div>
+        
+        <div class="info-row">
+            <div class="info-label">Fecha:</div>
+            <div class="info-value">{{ pago.fecha|date:"d/m/Y" }}</div>
+        </div>
+        
+        <div class="info-row">
+            <div class="info-label">Alumno:</div>
+            <div class="info-value">{{ pago.alumno.nombre }} {{ pago.alumno.apellido }}</div>
+        </div>
+        
+        {% if pago.profesor %}
+        <div class="info-row">
+            <div class="info-label">Profesor:</div>
+            <div class="info-value">{{ pago.profesor.user.get_full_name|default:pago.profesor.user.username }}</div>
+        </div>
+        {% endif %}
+        
+        <div class="info-row">
+            <div class="info-label">Concepto:</div>
+            <div class="info-value">{{ pago.concepto|default:"Pago de servicios educativos" }}</div>
+        </div>
+    </div>
+
+    <div class="pago-details">
+        <div class="info-row">
+            <div class="info-label">Importe:</div>
+                            <div class="info-value amount">{{ pago.importe_final }} €</div>
+        </div>
+    </div>
+
+    <div class="qr-placeholder">
+        Código QR<br>
+        (Opcional)
+    </div>
+
+    <div class="footer">
+        <p>Este documento es un comprobante oficial de pago emitido por Esquemas Centro de Estudios.</p>
+        <p>Para cualquier consulta, contacte con nosotros.</p>
+        <p>Documento generado automáticamente el {{ pago.fecha|date:"d/m/Y" }}</p>
+    </div>
+</body>
+</html>

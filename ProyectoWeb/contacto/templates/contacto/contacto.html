@@ -1,0 +1,191 @@
+<!-- Heredar de la plantilla base -->
+{% extends "proyectoWebApp/base.html" %}
+
+<!-- Cargar todo el contenido de la carpeta static(imagenes,css,etc..) -->
+{% load static %}
+
+<!--bloque de contenido cambiante que se va a aplicar-->
+{% block content %}
+
+<!-- Hero Section -->
+<!-- <section class="page-section clearfix">
+    <div class="container">
+        <div class="intro">
+            <div class="intro-text left-0 text-center bg-faded p-5 rounded">
+                <h2 class="section-heading mb-4">
+                    <span class="section-heading-upper">¿Necesitas ayuda?</span>
+                    <span class="section-heading-lower">Contáctanos</span>
+                </h2>
+                <p class="mb-3">Estamos aquí para ayudarte. Envíanos tu mensaje y te responderemos lo antes posible.</p>
+            </div>
+        </div>
+    </div>
+</section> -->
+
+<!-- Contact Form Section -->
+<section class="page-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg border-0">
+                    <div class="card-header bg-primary text-white text-center py-4">
+                        <h3 class="mb-0">
+                            <i class="fa fa-envelope"></i> Formulario de Contacto
+                        </h3>
+                    </div>
+                    <div class="card-body p-5">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    <i class="fa fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %}"></i>
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form action="" method="post" class="contact-form">
+                            {% csrf_token %}
+                            
+                            <!-- Honeypot field (hidden) -->
+                            <!-- {{ miFormulario.honeypot }} -->
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="form-floating">
+                                        {{ miFormulario.nombre }}
+                                        <label for="{{ miFormulario.nombre.id_for_label }}">
+                                            <i class="fa fa-user"></i> {{ miFormulario.nombre.label }}
+                                        </label>
+                                        {% if miFormulario.nombre.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in miFormulario.nombre.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <div class="form-floating">
+                                        {{ miFormulario.email }}
+                                        <label for="{{ miFormulario.email.id_for_label }}">
+                                            <i class="fa fa-envelope"></i> {{ miFormulario.email.label }}
+                                        </label>
+                                        {% if miFormulario.email.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in miFormulario.email.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="form-floating">
+                                        {{ miFormulario.telefono }}
+                                        <label for="{{ miFormulario.telefono.id_for_label }}">
+                                            <i class="fa fa-phone"></i> {{ miFormulario.telefono.label }}
+                                        </label>
+                                        {% if miFormulario.telefono.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in miFormulario.telefono.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <div class="form-floating">
+                                        {{ miFormulario.asunto }}
+                                        <label for="{{ miFormulario.asunto.id_for_label }}">
+                                            <i class="fa fa-tag"></i> {{ miFormulario.asunto.label }}
+                                        </label>
+                                        {% if miFormulario.asunto.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in miFormulario.asunto.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <div class="form-floating">
+                                    {{ miFormulario.contenido }}
+                                    <label for="{{ miFormulario.contenido.id_for_label }}">
+                                        <i class="fa fa-comment"></i> {{ miFormulario.contenido.label }}
+                                    </label>
+                                    {% if miFormulario.contenido.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in miFormulario.contenido.errors %}
+                                                {{ error }}
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="text-center">
+                                <button type="submit" value="Enviar" class="btn btn-primary btn-lg px-5">
+                                    <i class="fa fa-paper-plane"></i> Enviar Mensaje
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Contact Information Section -->
+<section class="page-section cta">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-9 mx-auto">
+                <div class="cta-inner text-center rounded">
+                    <h2 class="section-heading mb-4">
+                        <span class="section-heading-upper">Información de Contacto</span>
+                        <span class="section-heading-lower">Otras formas de contactarnos</span>
+                    </h2>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="contact-info">
+                                <i class="fa fa-map-marker fa-3x text-primary mb-3"></i>
+                                <h5>Dirección</h5>
+                                <p>Calle Principal, 123<br>28001 Madrid, España</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="contact-info">
+                                <i class="fa fa-phone fa-3x text-primary mb-3"></i>
+                                <h5>Teléfono</h5>
+                                <p>+34 91 123 45 67<br>+34 600 000 000</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="contact-info">
+                                <i class="fa fa-envelope fa-3x text-primary mb-3"></i>
+                                <h5>Email</h5>
+                                <p>info@esquemascentro.com<br>admin@esquemascentro.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
+

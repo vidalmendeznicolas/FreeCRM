@@ -1,0 +1,422 @@
+{% extends 'gestion/base_gestion.html' %}
+{% load static %}
+
+{% block title %}{{ horario.asignatura }} - Detalle{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'gestion:inicio' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'gestion:horarios' %}">Horarios</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ horario.asignatura }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+  <!-- Header del horario -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <div class="d-flex align-items-center">
+            <div class="avatar-lg me-3">
+              <i class="fa fa-book fa-4x text-primary"></i>
+            </div>
+            <div>
+              <h2 class="mb-1">{{ horario.asignatura }}</h2>
+              <p class="text-muted mb-2">{{ horario.get_dia_semana_display }} - {{ horario.hora_inicio|time:"H:i" }} a {{ horario.hora_fin|time:"H:i" }}</p>
+              <div class="d-flex gap-2">
+                {% if horario.activo %}
+                  <span class="badge bg-success">Activo</span>
+                {% else %}
+                  <span class="badge bg-danger">Inactivo</span>
+                {% endif %}
+                <span class="badge bg-primary">{{ total_alumnos }} alumnos</span>
+                {% if horario.aula %}
+                  <span class="badge bg-info">{{ horario.aula }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 text-end">
+          <div class="btn-group">
+            <a href="/admin/gestion/horario/{{ horario.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-primary">
+              <i class="fa fa-edit"></i> Editar
+            </a>
+            <a href="/admin/gestion/sesion/add/?horario={{ horario.id }}&_redirect={{ request.path|urlencode }}" class="btn btn-success">
+              <i class="fa fa-calendar-plus"></i> Crear Sesión
+            </a>
+            <a href="{% url 'gestion:horarios' %}" class="btn btn-secondary">
+              <i class="fa fa-arrow-left"></i> Volver
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas principales -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-3">
+      <div class="card stats-card bg-primary text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Ocupación del Aula</h6>
+              <h3 class="mb-0">{{ ocupacion }}%</h3>
+              <small>{{ total_alumnos }}/{{ horario.capacidad|default:"∞" }} alumnos</small>
+            </div>
+            <i class="fa fa-users fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-success text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Asistencia ({{ mes_actual }}/{{ año_actual }})</h6>
+              <h3 class="mb-0">{{ porcentaje_asistencia_general }}%</h3>
+              <small>{{ asistencias_mes }} asistencias</small>
+            </div>
+            <i class="fa fa-calendar-check fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-info text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Sesiones ({{ mes_actual }}/{{ año_actual }})</h6>
+              <h3 class="mb-0">{{ total_sesiones_mes }}</h3>
+              <small>Total del mes</small>
+            </div>
+            <i class="fa fa-calendar-day fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-warning text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Próximas sesiones</h6>
+              <h3 class="mb-0">{{ proximas_sesiones|length }}</h3>
+              <small>Programadas</small>
+            </div>
+            <i class="fa fa-calendar-plus fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Información del horario -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i>Información del Horario</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <td><strong>Asignatura:</strong></td>
+              <td>{{ horario.asignatura }}</td>
+            </tr>
+            <tr>
+              <td><strong>Día:</strong></td>
+              <td>{{ horario.get_dia_semana_display }}</td>
+            </tr>
+            <tr>
+              <td><strong>Horario:</strong></td>
+              <td>{{ horario.hora_inicio|time:"H:i" }} - {{ horario.hora_fin|time:"H:i" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Profesor:</strong></td>
+              <td>{{ horario.profesor.user.get_full_name|default:horario.profesor.user.username }}</td>
+            </tr>
+            <tr>
+              <td><strong>Aula:</strong></td>
+              <td>{{ horario.aula|default:"No especificada" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Capacidad:</strong></td>
+              <td>{{ horario.capacidad|default:"Sin límite" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Estado:</strong></td>
+              <td>
+                {% if horario.activo %}
+                  <span class="badge bg-success">Activo</span>
+                {% else %}
+                  <span class="badge bg-danger">Inactivo</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% if horario.fecha_inicio %}
+            <tr>
+              <td><strong>Fecha inicio:</strong></td>
+              <td>{{ horario.fecha_inicio|date:"d/m/Y" }}</td>
+            </tr>
+            {% endif %}
+            {% if horario.fecha_fin %}
+            <tr>
+              <td><strong>Fecha fin:</strong></td>
+              <td>{{ horario.fecha_fin|date:"d/m/Y" }}</td>
+            </tr>
+            {% endif %}
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alumnos matriculados -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fa fa-users me-2"></i>Alumnos Matriculados ({{ total_alumnos }})</h5>
+        </div>
+        <div class="card-body">
+          {% if alumnos_matriculados %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Estado</th>
+                  <th>Asistencia ({{ mes_actual }}/{{ año_actual }})</th>
+                  <th>Última asistencia</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in alumnos_matriculados %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-2">
+                        <i class="fa fa-user-circle fa-lg text-primary"></i>
+                      </div>
+                      <div>
+                        <strong>{{ item.alumno.nombre }} {{ item.alumno.apellido }}</strong>
+                        <br>
+                        <small class="text-muted">{{ item.alumno.dni }}</small>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge {% if item.matricula.estado == 'activa' %}bg-success{% elif item.matricula.estado == 'pendiente' %}bg-warning{% else %}bg-danger{% endif %}">
+                      {{ item.matricula.get_estado_display }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="d-flex flex-column">
+                      <div class="d-flex justify-content-between">
+                        <span class="text-success">{{ item.asistencias_este_mes }} ✅</span>
+                        <span class="text-danger">{{ item.total_sesiones_mes|add:"-"|add:item.asistencias_este_mes|add:"" }} ❌</span>
+                      </div>
+                      {% if item.total_sesiones_mes > 0 %}
+                        <div class="progress mt-1" style="height: 6px;">
+                          <div class="progress-bar bg-success" style="width: {{ item.porcentaje_asistencia }}%"></div>
+                        </div>
+                        <small class="text-muted">{{ item.porcentaje_asistencia }}%</small>
+                      {% else %}
+                        <small class="text-muted">Sin sesiones</small>
+                      {% endif %}
+                    </div>
+                  </td>
+                  <td>
+                    {% if item.ultima_asistencia %}
+                      <small>{{ item.ultima_asistencia.sesion.inicio|date:"d/m/Y" }}</small>
+                      <br>
+                      <small class="text-muted">
+                        {% if item.ultima_asistencia.presente %}
+                          ✅ Presente
+                        {% else %}
+                          ❌ Faltó
+                        {% endif %}
+                      </small>
+                    {% else %}
+                      <small class="text-muted">Sin registros</small>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <div class="btn-group btn-group-sm">
+                      <a href="{% url 'gestion:detalle_alumno' item.alumno.id %}" class="btn btn-outline-primary" title="Ver alumno">
+                        <i class="fa fa-eye"></i>
+                      </a>
+                      <a href="/admin/gestion/matriculahorario/{{ item.matricula.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-outline-secondary" title="Editar matrícula">
+                        <i class="fa fa-edit"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No hay alumnos matriculados en este horario.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Próximas sesiones -->
+  {% if proximas_sesiones %}
+  <div class="card mt-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fa fa-calendar-plus me-2"></i>Próximas Sesiones</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Asistencias</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for sesion in proximas_sesiones %}
+            <tr>
+              <td>{{ sesion.inicio|date:"d/m/Y" }}</td>
+              <td>{{ sesion.inicio|time:"H:i" }} - {{ sesion.fin|time:"H:i" }}</td>
+              <td>
+                <span class="badge bg-info">{{ sesion.asistencias.count }} registros</span>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a href="/admin/gestion/sesion/{{ sesion.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-outline-primary" title="Editar sesión">
+                    <i class="fa fa-edit"></i>
+                  </a>
+                  <a href="{% url 'gestion:detalle_asistencias' sesion.id %}" class="btn btn-outline-info" title="Ver asistencias">
+                    <i class="fa fa-users"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Últimas sesiones -->
+  {% if ultimas_sesiones %}
+  <div class="card mt-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fa fa-history me-2"></i>Últimas Sesiones</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Asistencias</th>
+              <th>Presentes</th>
+              <th>Porcentaje</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in ultimas_sesiones %}
+            <tr>
+              <td>{{ item.sesion.inicio|date:"d/m/Y" }}</td>
+              <td>{{ item.sesion.inicio|time:"H:i" }} - {{ item.sesion.fin|time:"H:i" }}</td>
+              <td>
+                <span class="badge bg-info">{{ item.total_asistencias }} total</span>
+              </td>
+              <td>
+                <div class="d-flex flex-column">
+                  <span class="badge bg-success">{{ item.asistencias_presentes }} presentes</span>
+                  <span class="badge bg-danger">{{ item.asistencias_faltas }} faltaron</span>
+                </div>
+              </td>
+              <td>
+                {% if item.total_asistencias > 0 %}
+                  <div class="progress" style="height: 6px;">
+                    <div class="progress-bar bg-success" style="width: {{ item.porcentaje_asistencia }}%"></div>
+                  </div>
+                  <small class="text-muted">{{ item.porcentaje_asistencia }}%</small>
+                {% else %}
+                  <small class="text-muted">-</small>
+                {% endif %}
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a href="/admin/gestion/sesion/{{ item.sesion.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-outline-primary" title="Editar sesión">
+                    <i class="fa fa-edit"></i>
+                  </a>
+                  <a href="{% url 'gestion:detalle_asistencias' item.sesion.id %}" class="btn btn-outline-info" title="Ver asistencias">
+                    <i class="fa fa-users"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-sm {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+}
+
+.table-borderless td {
+  border: none;
+  padding: 0.5rem 0;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
+.progress {
+  background-color: #f8f9fa;
+}
+
+.btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+</style>
+{% endblock %} 

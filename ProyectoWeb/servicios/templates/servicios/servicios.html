@@ -1,0 +1,119 @@
+<!-- Heredar de la plantilla base -->
+{% extends "proyectoWebApp/base.html" %}
+
+<!-- Cargar todo el contenido de la carpeta static(imagenes,css,etc..) -->
+{% load static %}
+
+<!--bloque de contenido cambiante que se va a aplicar-->
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <h1 class="hero-title">
+                        <span class="hero-subtitle">Descubre</span>
+                        <span class="hero-main-title">Nuestros Servicios</span>
+                    </h1>
+                    <p class="hero-description">
+                        Ofrecemos una amplia gama de servicios educativos diseñados para maximizar tu éxito académico. 
+                        Desde clases particulares hasta preparación de exámenes, tenemos todo lo que necesitas.
+                    </p>
+                    <div class="hero-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">{{ servicios|length }}</div>
+                            <div class="stat-label">Servicios</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">100%</div>
+                            <div class="stat-label">Garantizado</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">10+</div>
+                            <div class="stat-label">Años</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-image">
+                    <img class="img-fluid rounded shadow-lg" src="{% static 'proyectoWebApp/img/principal.jpg' %}" alt="Servicios Centro de Estudios">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Services Section -->
+{% if servicios %}
+<section class="services-section">
+    <div class="container">
+        <div class="section-header text-center mb-5">
+            <h2 class="section-title">
+                <span class="section-subtitle">Todos nuestros</span>
+                <span class="section-main-title">Servicios</span>
+            </h2>
+            <p class="section-description">Descubre todo lo que podemos ofrecerte para tu éxito académico</p>
+        </div>
+        
+        <div class="row">
+            {% for servicio in servicios %}
+            <div class="col-lg-6 col-md-12 mb-4">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="{{ servicio.imagen.url }}" alt="{{ servicio.titulo }}" class="img-fluid">
+                    </div>
+                    <div class="service-content">
+                        <h3 class="service-title">{{ servicio.titulo }}</h3>
+                        <p class="service-description">{{ servicio.contenido }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Commitment Section -->
+<section class="commitment-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="commitment-card">
+                    <div class="commitment-icon">
+                        <i class="fa fa-star"></i>
+                    </div>
+                    <h2 class="commitment-title">
+                        <span class="commitment-subtitle">Compromiso total</span>
+                        <span class="commitment-main-title">Garantizado</span>
+                    </h2>
+                    <p class="commitment-description">
+                        Con más de 10 años de experiencia a nuestras espaldas, desde asignaturas de primaria, 
+                        tenemos los conocimientos y herramientas necesarios para llevar cualquier alumno al 
+                        estrellato con puntualidad y profesionalidad.
+                    </p>
+                    <div class="commitment-features">
+                        <div class="feature-item">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Experiencia garantizada</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Resultados comprobados</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fa fa-check-circle"></i>
+                            <span>Profesores cualificados</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+

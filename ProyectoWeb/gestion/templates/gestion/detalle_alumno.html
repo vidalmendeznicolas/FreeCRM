@@ -1,0 +1,419 @@
+{% extends 'gestion/base_gestion.html' %}
+{% load static %}
+
+{% block title %}{{ alumno.nombre }} {{ alumno.apellido }} - Detalle{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'gestion:inicio' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'gestion:alumnos' %}">Alumnos</a></li>
+<li class="breadcrumb-item active" aria-current="page">{{ alumno.nombre }} {{ alumno.apellido }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+  <!-- Header del alumno -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <div class="d-flex align-items-center">
+            <div class="avatar-lg me-3">
+              <i class="fa fa-user-circle fa-4x text-primary"></i>
+            </div>
+            <div>
+              <h2 class="mb-1">{{ alumno.nombre }} {{ alumno.apellido }}</h2>
+              <p class="text-muted mb-2">DNI: {{ alumno.dni }}</p>
+              <div class="d-flex gap-2 mb-2">
+                {% if alumno.activo %}
+                  <span class="badge bg-success">Activo</span>
+                {% else %}
+                  <span class="badge bg-danger">Inactivo</span>
+                {% endif %}
+                <span class="badge bg-primary">{{ total_horarios }} horarios</span>
+                {% if alumno.tarifa_predeterminada %}
+                  <span class="badge bg-info">{{ alumno.tarifa_predeterminada }}</span>
+                {% else %}
+                  <span class="badge bg-secondary">Sin tarifa predeterminada</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 text-end">
+          <div class="btn-group">
+            <a href="/admin/gestion/alumno/{{ alumno.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-primary">
+              <i class="fa fa-edit"></i> Editar
+            </a>
+            <a href="/admin/gestion/pago/add/?alumno={{ alumno.id }}&_redirect={{ request.path|urlencode }}" class="btn btn-success">
+              <i class="fa fa-plus"></i> Añadir Pago
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas principales -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-3">
+      <div class="card stats-card bg-primary text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Asistencia ({{ mes_actual }}/{{ año_actual }})</h6>
+              <h3 class="mb-0">{{ porcentaje_asistencia }}%</h3>
+              <small>{{ asistencias_presente }}/{{ total_sesiones_mes }} sesiones</small>
+            </div>
+            <i class="fa fa-calendar-check fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-success text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Pagos ({{ mes_actual }}/{{ año_actual }})</h6>
+              <h3 class="mb-0">{{ pagos_mes_actual }} €</h3>
+              <small>Total pagado</small>
+            </div>
+            <i class="fa fa-euro-sign fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-info text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Total pagado</h6>
+              <h3 class="mb-0">{{ total_pagado }} €</h3>
+              <small>Histórico completo</small>
+            </div>
+            <i class="fa fa-coins fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-warning text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Faltas recientes</h6>
+              <h3 class="mb-0">{{ faltas_recientes.count }}</h3>
+              <small>Últimos 3 meses</small>
+            </div>
+            <i class="fa fa-exclamation-triangle fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Información personal -->
+    <div class="col-lg-4">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fa fa-user me-2"></i>Información Personal</h5>
+        </div>
+        <div class="card-body">
+          <table class="table table-borderless">
+            <tr>
+              <td><strong>Nombre:</strong></td>
+              <td>{{ alumno.nombre }} {{ alumno.apellido }}</td>
+            </tr>
+            <tr>
+              <td><strong>DNI:</strong></td>
+              <td>{{ alumno.dni|default:"No especificado" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Curso:</strong></td>
+              <td>
+                {% if alumno.curso %}
+                  <span class="badge bg-info">{{ alumno.get_curso_display }}</span>
+                {% else %}
+                  <span class="text-muted">No especificado</span>
+                {% endif %}
+              </td>
+            </tr>
+            <tr>
+              <td><strong>Teléfono:</strong></td>
+              <td>{{ alumno.telefono|default:"No especificado" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Fecha nacimiento:</strong></td>
+              <td>{{ alumno.fecha_nacimiento|date:"d/m/Y"|default:"No especificada" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Dirección:</strong></td>
+              <td>{{ alumno.direccion|default:"No especificada" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Fecha alta:</strong></td>
+              <td>{{ alumno.fecha_alta|date:"d/m/Y" }}</td>
+            </tr>
+            <tr>
+              <td><strong>Tipo:</strong></td>
+              <td>
+                {% if alumno.es_compartido %}
+                  <span class="badge bg-warning">Compartido</span>
+                  <small class="text-muted d-block">Puede ser compartido entre profesores</small>
+                {% else %}
+                  <span class="badge bg-secondary">Individual</span>
+                  <small class="text-muted d-block">Alumno individual</small>
+                {% endif %}
+              </td>
+            </tr>
+            {% if alumno.padre %}
+            <tr>
+              <td><strong>Padre/Madre:</strong></td>
+              <td>{{ alumno.padre.nombre }} {{ alumno.padre.apellido }}</td>
+            </tr>
+            {% endif %}
+          </table>
+          {% if alumno.observaciones %}
+          <div class="mt-3">
+            <strong>Observaciones:</strong>
+            <p class="text-muted">{{ alumno.observaciones }}</p>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Horarios matriculados -->
+    <div class="col-lg-8">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fa fa-clock me-2"></i>Horarios Matriculados</h5>
+        </div>
+        <div class="card-body">
+          {% if alumno.matriculas.all %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Asignatura</th>
+                  <th>Día</th>
+                  <th>Hora</th>
+                  <th>Profesor</th>
+                  <th>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for matricula in alumno.matriculas.all %}
+                <tr>
+                  <td>{{ matricula.horario.asignatura }}</td>
+                  <td>{{ matricula.horario.get_dia_semana_display }}</td>
+                  <td>{{ matricula.horario.hora_inicio|time:"H:i" }} - {{ matricula.horario.hora_fin|time:"H:i" }}</td>
+                  <td>{{ matricula.horario.profesor.user.get_full_name|default:matricula.horario.profesor.user.username }}</td>
+                  <td>
+                    <span class="badge {% if matricula.estado == 'activa' %}bg-success{% elif matricula.estado == 'pendiente' %}bg-warning{% else %}bg-danger{% endif %}">
+                      {{ matricula.get_estado_display }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted">No hay horarios matriculados.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Próximas sesiones -->
+  {% if proximas_sesiones %}
+  <div class="card mt-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fa fa-calendar-plus me-2"></i>Próximas Sesiones</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Asignatura</th>
+              <th>Profesor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in proximas_sesiones %}
+            <tr>
+              <td>{{ item.sesion.inicio|date:"d/m/Y" }}</td>
+              <td>{{ item.sesion.inicio|time:"H:i" }} - {{ item.sesion.fin|time:"H:i" }}</td>
+              <td>{{ item.horario.asignatura }}</td>
+                                <td>{{ item.horario.profesor.user.get_full_name|default:item.horario.profesor.user.username }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Faltas de asistencia -->
+  {% if faltas_recientes %}
+  <div class="card mt-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fa fa-times-circle me-2"></i>Faltas de Asistencia (Últimos 3 meses)</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Asignatura</th>
+              <th>Profesor</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for asistencia in faltas_recientes %}
+            <tr>
+              <td>{{ asistencia.sesion.inicio|date:"d/m/Y" }}</td>
+              <td>{{ asistencia.sesion.inicio|time:"H:i" }} - {{ asistencia.sesion.fin|time:"H:i" }}</td>
+              <td>{{ asistencia.sesion.horario.asignatura }}</td>
+              <td>{{ asistencia.sesion.horario.profesor.user.get_full_name|default:asistencia.sesion.horario.profesor.user.username }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Historial de pagos -->
+  {% if pagos_alumno %}
+  <div class="card mt-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fa fa-receipt me-2"></i>Historial de Pagos</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Número</th>
+              <th>Concepto</th>
+              <th>Importe</th>
+              <th>Profesor</th>
+              <th>Comprobante</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for pago in pagos_alumno %}
+            <tr>
+              <td>{{ pago.fecha|date:"d/m/Y" }}</td>
+              <td>{{ pago.numero }}</td>
+              <td>{{ pago.concepto|default:"-" }}</td>
+                                      <td><strong>{{ pago.importe_final }} €</strong></td>
+              <td>
+                {% if pago.profesor %}
+                  {{ pago.profesor.user.get_full_name|default:pago.profesor.user.username }}
+                {% else %}
+                  -
+                {% endif %}
+              </td>
+              <td>
+                {% if pago.comprobante %}
+                <a href="{{ pago.comprobante.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="fa fa-file-pdf"></i> Ver
+                </a>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Historial de asistencias -->
+  {% if historial_asistencias %}
+  <div class="card mt-3">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fa fa-history me-2"></i>Historial de Asistencias (Últimos 6 meses)</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Hora</th>
+              <th>Asignatura</th>
+              <th>Profesor</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for asistencia in historial_asistencias %}
+            <tr>
+              <td>{{ asistencia.sesion.inicio|date:"d/m/Y" }}</td>
+              <td>{{ asistencia.sesion.inicio|time:"H:i" }} - {{ asistencia.sesion.fin|time:"H:i" }}</td>
+              <td>{{ asistencia.sesion.horario.asignatura }}</td>
+              <td>{{ asistencia.sesion.horario.profesor.user.get_full_name|default:asistencia.sesion.horario.profesor.user.username }}</td>
+              <td>
+                {% if asistencia.presente %}
+                <span class="badge bg-success">✅ Presente</span>
+                {% else %}
+                <span class="badge bg-danger">❌ Faltó</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+}
+
+.table-borderless td {
+  border: none;
+  padding: 0.5rem 0;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+</style>
+{% endblock %} 

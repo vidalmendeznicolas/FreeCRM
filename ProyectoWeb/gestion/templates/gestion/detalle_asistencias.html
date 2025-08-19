@@ -1,0 +1,353 @@
+{% extends 'gestion/base_gestion.html' %}
+{% load static %}
+
+{% block title %}Asistencias - {{ sesion.horario.asignatura }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'gestion:inicio' %}">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'gestion:horarios' %}">Horarios</a></li>
+<li class="breadcrumb-item"><a href="{% url 'gestion:detalle_horario' sesion.horario.id %}">{{ sesion.horario.asignatura }}</a></li>
+<li class="breadcrumb-item active" aria-current="page">Asistencias</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+  <!-- Header de la sesión -->
+  <div class="card mb-3">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <div class="d-flex align-items-center">
+            <div class="avatar-lg me-3">
+              <i class="fa fa-calendar-check fa-4x text-success"></i>
+            </div>
+            <div>
+              <h2 class="mb-1">{{ sesion.horario.asignatura }}</h2>
+              <p class="text-muted mb-2">{{ sesion.inicio|date:"d/m/Y" }} - {{ sesion.inicio|time:"H:i" }} a {{ sesion.fin|time:"H:i" }}</p>
+              <div class="d-flex gap-2">
+                <span class="badge bg-primary">{{ sesion.horario.get_dia_semana_display }}</span>
+                <span class="badge bg-info">{{ sesion.horario.profesor.user.get_full_name|default:sesion.horario.profesor.user.username }}</span>
+                {% if sesion.horario.aula %}
+                  <span class="badge bg-secondary">{{ sesion.horario.aula }}</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4 text-end">
+          <div class="btn-group">
+            <a href="/admin/gestion/sesion/{{ sesion.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-primary">
+              <i class="fa fa-edit"></i> Editar Sesión
+            </a>
+            <a href="{% url 'gestion:detalle_horario' sesion.horario.id %}" class="btn btn-secondary">
+              <i class="fa fa-arrow-left"></i> Volver
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas principales -->
+  <div class="row g-3 mb-4">
+    <div class="col-lg-3">
+      <div class="card stats-card bg-primary text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Alumnos Matriculados</h6>
+              <h3 class="mb-0">{{ total_matriculados }}</h3>
+              <small>Total activos</small>
+            </div>
+            <i class="fa fa-users fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-success text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Presentes</h6>
+              <h3 class="mb-0">{{ total_presentes }}</h3>
+              <small>Asistieron</small>
+            </div>
+            <i class="fa fa-check-circle fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-danger text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Faltaron</h6>
+              <h3 class="mb-0">{{ total_faltas }}</h3>
+              <small>No asistieron</small>
+            </div>
+            <i class="fa fa-times-circle fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-info text-white">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Asistencia</h6>
+              <h3 class="mb-0">{{ porcentaje_asistencia }}%</h3>
+              <small>Porcentaje</small>
+            </div>
+            <i class="fa fa-percentage fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3">
+    <!-- Alumnos Presentes -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="fa fa-check-circle me-2"></i>Alumnos Presentes ({{ total_presentes }})</h5>
+        </div>
+        <div class="card-body">
+          {% if asistencias_presentes %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>DNI</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for asistencia in asistencias_presentes %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-2">
+                        <i class="fa fa-user-check fa-lg text-success"></i>
+                      </div>
+                      <div>
+                        <strong>{{ asistencia.alumno.nombre }} {{ asistencia.alumno.apellido }}</strong>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ asistencia.alumno.dni }}</td>
+                  <td>
+                    <a href="{% url 'gestion:detalle_alumno' asistencia.alumno.id %}" class="btn btn-sm btn-outline-primary">
+                      <i class="fa fa-eye"></i> Ver
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted text-center py-3">
+            <i class="fa fa-info-circle fa-2x mb-2"></i>
+            <br>
+            No hay alumnos presentes en esta sesión.
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Alumnos que Faltaron -->
+    <div class="col-lg-6">
+      <div class="card">
+        <div class="card-header bg-danger text-white">
+          <h5 class="mb-0"><i class="fa fa-times-circle me-2"></i>Alumnos que Faltaron ({{ total_faltas }})</h5>
+        </div>
+        <div class="card-body">
+          {% if asistencias_faltas %}
+          <div class="table-responsive">
+            <table class="table table-sm">
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>DNI</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for asistencia in asistencias_faltas %}
+                <tr>
+                  <td>
+                    <div class="d-flex align-items-center">
+                      <div class="avatar-sm me-2">
+                        <i class="fa fa-user-times fa-lg text-danger"></i>
+                      </div>
+                      <div>
+                        <strong>{{ asistencia.alumno.nombre }} {{ asistencia.alumno.apellido }}</strong>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{{ asistencia.alumno.dni }}</td>
+                  <td>
+                    <a href="{% url 'gestion:detalle_alumno' asistencia.alumno.id %}" class="btn btn-sm btn-outline-primary">
+                      <i class="fa fa-eye"></i> Ver
+                    </a>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted text-center py-3">
+            <i class="fa fa-check-circle fa-2x mb-2 text-success"></i>
+            <br>
+            ¡Todos los alumnos asistieron!
+          </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alumnos sin registro de asistencia -->
+  {% if alumnos_sin_registro %}
+  <div class="card mt-3">
+    <div class="card-header bg-warning text-dark">
+      <h5 class="mb-0"><i class="fa fa-exclamation-triangle me-2"></i>Alumnos sin Registro de Asistencia ({{ alumnos_sin_registro|length }})</h5>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-warning">
+        <i class="fa fa-info-circle me-2"></i>
+        Los siguientes alumnos están matriculados pero no tienen registro de asistencia en esta sesión.
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>DNI</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for alumno in alumnos_sin_registro %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-sm me-2">
+                    <i class="fa fa-user-question fa-lg text-warning"></i>
+                  </div>
+                  <div>
+                    <strong>{{ alumno.nombre }} {{ alumno.apellido }}</strong>
+                  </div>
+                </div>
+              </td>
+              <td>{{ alumno.dni }}</td>
+              <td>
+                <a href="{% url 'gestion:detalle_alumno' alumno.id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="fa fa-eye"></i> Ver
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Otros registros de asistencia -->
+  {% if asistencias_otros %}
+  <div class="card mt-3">
+    <div class="card-header bg-secondary text-white">
+      <h5 class="mb-0"><i class="fa fa-info-circle me-2"></i>Otros Registros de Asistencia ({{ total_otros }})</h5>
+    </div>
+    <div class="card-body">
+      <div class="alert alert-info">
+        <i class="fa fa-info-circle me-2"></i>
+        Los siguientes registros corresponden a alumnos no matriculados activamente en este horario.
+      </div>
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead>
+            <tr>
+              <th>Alumno</th>
+              <th>Estado</th>
+              <th>DNI</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for asistencia in asistencias_otros %}
+            <tr>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="avatar-sm me-2">
+                    <i class="fa fa-user fa-lg text-secondary"></i>
+                  </div>
+                  <div>
+                    <strong>{{ asistencia.alumno.nombre }} {{ asistencia.alumno.apellido }}</strong>
+                  </div>
+                </div>
+              </td>
+              <td>
+                {% if asistencia.presente %}
+                  <span class="badge bg-success">Presente</span>
+                {% else %}
+                  <span class="badge bg-danger">Faltó</span>
+                {% endif %}
+              </td>
+              <td>{{ asistencia.alumno.dni }}</td>
+              <td>
+                <a href="{% url 'gestion:detalle_alumno' asistencia.alumno.id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="fa fa-eye"></i> Ver
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<style>
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-sm {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+</style>
+{% endblock %} 

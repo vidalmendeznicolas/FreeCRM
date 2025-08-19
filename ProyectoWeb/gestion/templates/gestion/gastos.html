@@ -1,0 +1,269 @@
+{% extends 'gestion/base_gestion.html' %}
+{% load static %}
+
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h3 mb-0">
+      <i class="fa fa-money-bill-wave me-2"></i>{{ titulo }}
+    </h1>
+    <div class="d-flex gap-2">
+      <a href="/admin/gestion/gasto/add/?_redirect={{ request.path|urlencode }}" class="btn btn-success">
+        <i class="fa fa-plus"></i> Nuevo Gasto
+      </a>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stats-mini" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+        <div class="row align-items-center">
+          <div class="col">
+            <h4>{{ total_gastos|floatformat:2 }} €</h4>
+            <p><i class="fa fa-money-bill-wave"></i> Total Gastos</p>
+          </div>
+          <div class="col-auto">
+            <i class="fa fa-money-bill-wave fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stats-mini" style="background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);">
+        <div class="row align-items-center">
+          <div class="col">
+            <h4>{{ gastos_mes|floatformat:2 }} €</h4>
+            <p><i class="fa fa-calendar"></i> Mes Actual</p>
+          </div>
+          <div class="col-auto">
+            <i class="fa fa-calendar fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stats-mini" style="background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);">
+        <div class="row align-items-center">
+          <div class="col">
+            <h4>{{ gastos|length }}</h4>
+            <p><i class="fa fa-list"></i> Registros</p>
+          </div>
+          <div class="col-auto">
+            <i class="fa fa-list fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="stats-mini" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);">
+        <div class="row align-items-center">
+          <div class="col">
+            <h4>{{ gastos_por_categoria|length }}</h4>
+            <p><i class="fa fa-tags"></i> Categorías</p>
+          </div>
+          <div class="col-auto">
+            <i class="fa fa-tags fa-2x opacity-75"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="card mb-4">
+    <div class="card-header">
+      <h5 class="mb-0"><i class="fa fa-filter me-2"></i>Filtros</h5>
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Buscar</label>
+          <input type="text" name="q" value="{{ filters.q }}" placeholder="Concepto, observaciones..." class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Categoría</label>
+          <select name="categoria" class="form-select">
+            <option value="">Todas</option>
+            {% for codigo, nombre in categorias %}
+            <option value="{{ codigo }}" {% if filters.categoria == codigo %}selected{% endif %}>
+              {{ nombre }}
+            </option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Desde</label>
+          <input type="date" name="fecha_desde" value="{{ filters.fecha_desde }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Hasta</label>
+          <input type="date" name="fecha_hasta" value="{{ filters.fecha_hasta }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">&nbsp;</label>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="fa fa-search"></i> Filtrar
+            </button>
+            <a href="{% url 'gestion:gastos' %}" class="btn btn-outline-secondary">
+              <i class="fa fa-times"></i> Limpiar
+            </a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Gastos por Categoría -->
+  {% if gastos_por_categoria %}
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card">
+        <div class="card-header">
+          <h5 class="mb-0"><i class="fa fa-chart-pie me-2"></i>Gastos por Categoría</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            {% for item in gastos_por_categoria %}
+            <div class="col-md-3 mb-3">
+              <div class="border rounded p-3 text-center">
+                <h6 class="text-muted mb-2">{{ item.categoria|title }}</h6>
+                <h4 class="text-primary mb-1">{{ item.total|floatformat:2 }} €</h4>
+                <small class="text-muted">{{ item.count }} gastos</small>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Gastos del Mes Actual -->
+  {% if gastos_mes_actual %}
+  <div class="card mb-4">
+    <div class="card-header bg-info text-white">
+      <h5 class="mb-0"><i class="fa fa-calendar me-2"></i>Gastos del Mes Actual ({{ mes_actual }}/{{ año_actual }})</h5>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-sm">
+                     <thead>
+             <tr>
+               <th>Fecha</th>
+               <th>Concepto</th>
+               <th>Categoría</th>
+               <th>Importe</th>
+               <th>Factura</th>
+             </tr>
+           </thead>
+          <tbody>
+            {% for gasto in gastos_mes_actual %}
+            <tr>
+              <td>{{ gasto.fecha_gasto|date:"d/m/Y" }}</td>
+              <td>{{ gasto.concepto }}</td>
+              <td>
+                <span class="badge bg-secondary">{{ gasto.get_categoria_display }}</span>
+              </td>
+              <td><strong>{{ gasto.importe|floatformat:2 }} €</strong></td>
+              <td>
+                {% if gasto.factura %}
+                <a href="{{ gasto.factura.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="fa fa-file-pdf"></i> Ver
+                </a>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Lista de Gastos -->
+  <div class="card">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <span><i class="fa fa-list me-2"></i> Todos los Gastos</span>
+      <div class="d-flex align-items-center gap-2">
+        <small class="text-muted">{{ gastos|length }} registros</small>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-hover">
+                     <thead>
+             <tr>
+               <th>Fecha Gasto</th>
+               <th>Concepto</th>
+               <th>Categoría</th>
+               <th>Importe</th>
+               <th>Observaciones</th>
+               <th>Factura</th>
+               <th>Acciones</th>
+             </tr>
+           </thead>
+          <tbody>
+            {% for gasto in gastos %}
+            <tr>
+              <td>{{ gasto.fecha_gasto|date:"d/m/Y" }}</td>
+              <td>
+                <div class="fw-bold">{{ gasto.concepto }}</div>
+                <small class="text-muted">Registrado: {{ gasto.fecha|date:"d/m/Y" }}</small>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ gasto.get_categoria_display }}</span>
+              </td>
+              <td>
+                <strong class="text-danger">{{ gasto.importe|floatformat:2 }} €</strong>
+              </td>
+              <td>
+                {% if gasto.observaciones %}
+                <small class="text-muted">{{ gasto.observaciones|truncatechars:50 }}</small>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if gasto.factura %}
+                <a href="{{ gasto.factura.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                  <i class="fa fa-file-pdf"></i> Ver
+                </a>
+                {% else %}
+                <span class="text-muted">-</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a href="/admin/gestion/gasto/{{ gasto.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-outline-primary" title="Editar">
+                    <i class="fa fa-edit"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="7" class="text-center text-muted py-4">
+                <i class="fa fa-inbox fa-3x mb-3"></i>
+                <p>No hay gastos registrados</p>
+                <a href="/admin/gestion/gasto/add/?_redirect={{ request.path|urlencode }}" class="btn btn-primary">
+                  <i class="fa fa-plus"></i> Registrar Primer Gasto
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

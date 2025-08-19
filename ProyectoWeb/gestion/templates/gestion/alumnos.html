@@ -1,0 +1,300 @@
+{% extends 'gestion/base_gestion.html' %}
+{% load static %}
+
+{% block title %}Gestión de Alumnos{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'gestion:inicio' %}">Inicio</a></li>
+<li class="breadcrumb-item active" aria-current="page">Alumnos</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+  <!-- Filtros -->
+  <div class="card mb-3">
+    <div class="card-header bg-white">
+      <i class="fa fa-search me-2"></i> Filtros
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">Buscar alumno</label>
+          <input type="text" name="q" value="{{ filters.q }}" placeholder="Nombre, apellido o DNI" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Estado</label>
+          <select name="estado" class="form-select">
+            <option value="">Todos</option>
+            <option value="activo" {% if filters.estado == 'activo' %}selected{% endif %}>Activos</option>
+            <option value="inactivo" {% if filters.estado == 'inactivo' %}selected{% endif %}>Inactivos</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Curso</label>
+          <select name="curso" class="form-select">
+            <option value="">Todos</option>
+            <optgroup label="Primaria">
+              <option value="1P" {% if filters.curso == '1P' %}selected{% endif %}>1º Primaria</option>
+              <option value="2P" {% if filters.curso == '2P' %}selected{% endif %}>2º Primaria</option>
+              <option value="3P" {% if filters.curso == '3P' %}selected{% endif %}>3º Primaria</option>
+              <option value="4P" {% if filters.curso == '4P' %}selected{% endif %}>4º Primaria</option>
+              <option value="5P" {% if filters.curso == '5P' %}selected{% endif %}>5º Primaria</option>
+              <option value="6P" {% if filters.curso == '6P' %}selected{% endif %}>6º Primaria</option>
+            </optgroup>
+            <optgroup label="E.S.O">
+              <option value="1E" {% if filters.curso == '1E' %}selected{% endif %}>1º E.S.O</option>
+              <option value="2E" {% if filters.curso == '2E' %}selected{% endif %}>2º E.S.O</option>
+              <option value="3E" {% if filters.curso == '3E' %}selected{% endif %}>3º E.S.O</option>
+              <option value="4E" {% if filters.curso == '4E' %}selected{% endif %}>4º E.S.O</option>
+            </optgroup>
+            <optgroup label="Bachillerato">
+              <option value="1B" {% if filters.curso == '1B' %}selected{% endif %}>1º Bachillerato</option>
+              <option value="2B" {% if filters.curso == '2B' %}selected{% endif %}>2º Bachillerato</option>
+            </optgroup>
+            <optgroup label="Otros">
+              <option value="FP" {% if filters.curso == 'FP' %}selected{% endif %}>FP</option>
+              <option value="AD" {% if filters.curso == 'AD' %}selected{% endif %}>Adultos</option>
+              <option value="EB" {% if filters.curso == 'EB' %}selected{% endif %}>EBAU</option>
+              <option value="EO" {% if filters.curso == 'EO' %}selected{% endif %}>EOI</option>
+            </optgroup>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Compartido</label>
+          <select name="compartido" class="form-select">
+            <option value="">Todos</option>
+            <option value="compartido" {% if filters.compartido == 'compartido' %}selected{% endif %}>Compartidos</option>
+            <option value="individual" {% if filters.compartido == 'individual' %}selected{% endif %}>Individuales</option>
+          </select>
+        </div>
+        <div class="col-md-2 d-grid">
+          <button class="btn btn-primary"><i class="fa fa-filter"></i> Filtrar</button>
+        </div>
+        <div class="col-md-2 d-grid">
+          <a href="{% url 'gestion:alumnos' %}" class="btn btn-outline-secondary"><i class="fa fa-times"></i> Limpiar</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Estadísticas generales -->
+  <div class="row g-3 mb-3">
+    <div class="col-lg-3">
+      <div class="card stats-card">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Total alumnos</h6>
+              <h3 class="mb-0">{{ total_alumnos }}</h3>
+            </div>
+            <i class="fa fa-users fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-success">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Alumnos activos</h6>
+              <h3 class="mb-0">{{ alumnos_activos }}</h3>
+            </div>
+            <i class="fa fa-user-check fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-warning">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Alumnos compartidos</h6>
+              <h3 class="mb-0">{{ alumnos_compartidos }}</h3>
+            </div>
+            <i class="fa fa-users-cog fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-3">
+      <div class="card stats-card bg-info">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h6 class="mb-1">Mes actual</h6>
+              <h3 class="mb-0">{{ mes_actual }}/{{ año_actual }}</h3>
+            </div>
+            <i class="fa fa-calendar fa-2x"></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de alumnos -->
+  <div class="card table-gestion">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+      <span><i class="fa fa-users me-2"></i> Alumnos</span>
+      <div class="d-flex align-items-center gap-2">
+        <small class="text-muted">{{ alumnos|length }} registros</small>
+        <a href="/admin/gestion/alumno/add/?_redirect={{ request.path|urlencode }}" class="btn btn-success btn-sm">
+          <i class="fa fa-plus"></i> Nuevo Alumno
+        </a>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Alumno</th>
+            <th>Curso</th>
+            <th>Estado</th>
+            <th>Compartido</th>
+            <th>Horarios</th>
+            <th>Asistencia ({{ mes_actual }}/{{ año_actual }})</th>
+            <th>Pagos ({{ mes_actual }}/{{ año_actual }})</th>
+            <th>Último pago</th>
+            <th>Próxima sesión</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for stats in alumnos %}
+          <tr>
+            <td>
+              <div class="d-flex align-items-center">
+                <div class="avatar-sm me-2">
+                  <i class="fa fa-user-circle fa-2x text-primary"></i>
+                </div>
+                <div>
+                  <strong>{{ stats.alumno.nombre }} {{ stats.alumno.apellido }}</strong>
+                  <br>
+                  <small class="text-muted">{{ stats.alumno.dni }}</small>
+                </div>
+              </div>
+            </td>
+            <td>
+              {% if stats.alumno.curso %}
+                <span class="badge bg-info">{{ stats.alumno.get_curso_display }}</span>
+              {% else %}
+                <span class="text-muted">-</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if stats.alumno.activo %}
+                <span class="badge bg-success">Activo</span>
+              {% else %}
+                <span class="badge bg-danger">Inactivo</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if stats.alumno.es_compartido %}
+                <span class="badge bg-warning">Compartido</span>
+              {% else %}
+                <span class="badge bg-secondary">Individual</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge bg-primary">{{ stats.horarios_matriculados }} horarios</span>
+            </td>
+            <td>
+              <div class="d-flex flex-column">
+                <div class="d-flex justify-content-between">
+                  <span class="text-success">{{ stats.asistencias_este_mes }} ✅</span>
+                  <span class="text-danger">{{ stats.no_asistencias_este_mes }} ❌</span>
+                </div>
+                {% if stats.total_sesiones_mes > 0 %}
+                  <div class="progress mt-1" style="height: 6px;">
+                    <div class="progress-bar bg-success" style="width: {{ stats.porcentaje_asistencia }}%"></div>
+                  </div>
+                  <small class="text-muted">{{ stats.porcentaje_asistencia }}%</small>
+                {% else %}
+                  <small class="text-muted">Sin sesiones</small>
+                {% endif %}
+              </div>
+            </td>
+            <td>
+              {% if stats.pagos_este_mes > 0 %}
+                <span class="text-success fw-bold">{{ stats.pagos_este_mes }} €</span>
+              {% else %}
+                <span class="text-warning">Sin pagos</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if stats.ultimo_pago %}
+                <small>{{ stats.ultimo_pago.fecha|date:"d/m/Y" }}</small>
+                <br>
+                                        <small class="text-muted">{{ stats.ultimo_pago.importe_final }} €</small>
+              {% else %}
+                <small class="text-muted">Sin pagos</small>
+              {% endif %}
+            </td>
+            <td>
+              {% if stats.proxima_sesion %}
+                <small>{{ stats.proxima_sesion.inicio|date:"d/m/Y H:i" }}</small>
+                <br>
+                <small class="text-muted">{{ stats.proxima_sesion.horario.asignatura }}</small>
+              {% else %}
+                <small class="text-muted">Sin sesiones</small>
+              {% endif %}
+            </td>
+            <td>
+              <div class="btn-group btn-group-sm">
+                <a href="/admin/gestion/alumno/{{ stats.alumno.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-outline-primary" title="Editar">
+                  <i class="fa fa-edit"></i>
+                </a>
+                <a href="/admin/gestion/pago/add/?alumno={{ stats.alumno.id }}&_redirect={{ request.path|urlencode }}" class="btn btn-outline-success" title="Añadir pago">
+                  <i class="fa fa-plus"></i>
+                </a>
+                <a href="{% url 'gestion:detalle_alumno' stats.alumno.id %}" class="btn btn-outline-info" title="Ver detalles">
+                  <i class="fa fa-eye"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="10" class="text-center text-muted py-4">
+              <i class="fa fa-users fa-3x mb-3"></i>
+              <br>
+              No hay alumnos que coincidan con los filtros actuales.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<style>
+.avatar-sm {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress {
+  background-color: #f8f9fa;
+}
+
+.btn-group-sm .btn {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+.stats-card {
+  border: none;
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  transition: transform 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-2px);
+}
+</style>
+{% endblock %} 

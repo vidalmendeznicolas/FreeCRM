@@ -1,0 +1,96 @@
+/* Estilos para el campo de factura en el admin de gastos */
+.file-upload-container {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    background-color: #f8f9fa;
+    transition: all 0.3s ease;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.file-upload-container:hover {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+
+.file-upload-container.dragover {
+    border-color: #28a745;
+    background-color: #d4edda;
+}
+
+.file-info {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.file-info .filename {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.file-info .filesize {
+    color: #6c757d;
+    font-size: 0.8em;
+}
+
+.upload-icon {
+    font-size: 2em;
+    color: #6c757d;
+    margin-bottom: 10px;
+}
+
+.allowed-formats {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.factura-field {
+    background-color: #fff3cd !important;
+    border-color: #ffc107 !important;
+}
+
+.factura-field:focus {
+    background-color: #ffeaa7 !important;
+    border-color: #ffc107 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
+}
+
+/* Ocultar el campo original */
+.hidden-file-input {
+    display: none !important;
+}
+
+/* Estilos para el mensaje de ayuda */
+.help-text {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+/* Estilos para el badge de estado */
+.badge {
+    padding: 0.25em 0.6em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.375rem;
+}
+
+.bg-success {
+    background-color: #198754 !important;
+    color: white;
+}
+
+.bg-warning {
+    background-color: #ffc107 !important;
+    color: #000;
+} 

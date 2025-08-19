@@ -1,0 +1,212 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Script cargado - buscando campos...');
+    
+    const tarifaSelect = document.getElementById('id_tarifa');
+    const importeOriginalField = document.getElementById('id_importe_original');
+    const descuentoField = document.getElementById('id_descuento');
+    const importeFinalField = document.getElementById('id_importe_final');
+    const alumnoSelect = document.getElementById('id_alumno');
+    
+    // Función para pre-llenar tarifa basada en el alumno seleccionado
+    window.prefillTarifa = function(alumnoId) {
+        if (alumnoId) {
+            // Hacer una petición AJAX para obtener la tarifa predeterminada del alumno
+            fetch(`/admin/gestion/alumno/${alumnoId}/change/`)
+                .then(response => response.text())
+                .then(html => {
+                    // Extraer la tarifa predeterminada del HTML
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const tarifaField = doc.querySelector('#id_tarifa_predeterminada');
+                    if (tarifaField && tarifaField.value) {
+                        // Buscar la opción correspondiente en el select de tarifa
+                        const option = tarifaSelect.querySelector(`option[value="${tarifaField.value}"]`);
+                        if (option) {
+                            tarifaSelect.value = tarifaField.value;
+                            updateImporteOriginal();
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('Error al obtener tarifa predeterminada:', error);
+                });
+        }
+    };
+    
+    console.log('Campos encontrados:', {
+        tarifa: tarifaSelect,
+        importeOriginal: importeOriginalField,
+        descuento: descuentoField,
+        importeFinal: importeFinalField
+    });
+    
+    // Función para actualizar el importe original cuando se selecciona una tarifa
+    function updateImporteOriginal() {
+        console.log('Actualizando importe original...');
+        const selectedOption = tarifaSelect.options[tarifaSelect.selectedIndex];
+        console.log('Opción seleccionada:', selectedOption);
+        
+        if (selectedOption && selectedOption.value) {
+            const tarifaText = selectedOption.text;
+            console.log('Texto de tarifa:', tarifaText);
+            
+            // Buscar el precio en el texto con múltiples patrones
+            let precioMatch = null;
+            let precio = 0;
+            
+            // Patrón 1: "Nombre - XX.XX€"
+            precioMatch = tarifaText.match(/(\d+\.\d+)\s*€/);
+            if (precioMatch) {
+                precio = parseFloat(precioMatch[1]);
+                console.log('Precio extraído (patrón 1):', precio);
+            } else {
+                // Patrón 2: "Nombre - XX,XX€"
+                precioMatch = tarifaText.match(/(\d+,\d+)\s*€/);
+                if (precioMatch) {
+                    precio = parseFloat(precioMatch[1].replace(',', '.'));
+                    console.log('Precio extraído (patrón 2):', precio);
+                } else {
+                    // Patrón 3: "Nombre - XX€" (sin decimales)
+                    precioMatch = tarifaText.match(/(\d+)\s*€/);
+                    if (precioMatch) {
+                        precio = parseFloat(precioMatch[1]);
+                        console.log('Precio extraído (patrón 3):', precio);
+                    } else {
+                        console.log('No se pudo extraer el precio del texto:', tarifaText);
+                        console.log('Intentando extraer solo números...');
+                        // Último intento: extraer cualquier número antes de €
+                        const numerosMatch = tarifaText.match(/(\d+(?:[.,]\d+)?)\s*€/);
+                        if (numerosMatch) {
+                            precio = parseFloat(numerosMatch[1].replace(',', '.'));
+                            console.log('Precio extraído (último intento):', precio);
+                        }
+                    }
+                }
+            }
+            
+            if (precio > 0) {
+                // Usar punto decimal para el navegador, no coma
+                importeOriginalField.value = precio.toFixed(2);
+                console.log('Importe original establecido:', importeOriginalField.value);
+                calculateImporteFinal();
+            } else {
+                console.log('No se pudo extraer un precio válido');
+            }
+        } else {
+            importeOriginalField.value = '';
+            calculateImporteFinal();
+        }
+    }
+    
+    // Función para calcular el importe final
+    function calculateImporteFinal() {
+        console.log('Calculando importe final...');
+        
+        // Usar punto decimal consistentemente
+        const importeOriginalStr = importeOriginalField.value;
+        const descuentoStr = descuentoField.value;
+        
+        const importeOriginal = parseFloat(importeOriginalStr) || 0;
+        const descuento = parseFloat(descuentoStr) || 0;
+        const importeFinal = importeOriginal - descuento;
+        
+        console.log('Cálculo:', {
+            importeOriginal: importeOriginal,
+            descuento: descuento,
+            importeFinal: importeFinal
+        });
+        
+        // Usar punto decimal para el navegador
+        importeFinalField.value = importeFinal.toFixed(2);
+        console.log('Importe final establecido:', importeFinalField.value);
+        
+        // Resaltar el campo si hay descuento
+        if (descuento > 0) {
+            importeFinalField.classList.add('has-discount');
+        } else {
+            importeFinalField.classList.remove('has-discount');
+        }
+    }
+    
+    // Event listeners
+    if (tarifaSelect) {
+        console.log('Añadiendo event listener a tarifa');
+        tarifaSelect.addEventListener('change', updateImporteOriginal);
+    }
+    
+    if (descuentoField) {
+        console.log('Añadiendo event listeners a descuento');
+        descuentoField.addEventListener('input', calculateImporteFinal);
+        descuentoField.addEventListener('change', calculateImporteFinal);
+    }
+    
+    if (importeOriginalField) {
+        console.log('Añadiendo event listeners a importe original');
+        importeOriginalField.addEventListener('input', calculateImporteFinal);
+        importeOriginalField.addEventListener('change', calculateImporteFinal);
+    }
+    
+    // Inicializar valores
+    console.log('Inicializando valores...');
+    if (tarifaSelect && tarifaSelect.value) {
+        updateImporteOriginal();
+    } else {
+        calculateImporteFinal();
+    }
+    
+    // Calcular también al cargar la página
+    setTimeout(function() {
+        console.log('Cálculo inicial después de 100ms');
+        calculateImporteFinal();
+    }, 100);
+});
+</script>
+
+<style>
+.auto-fill-field {
+    background-color: #e8f5e8 !important;
+    border-color: #28a745 !important;
+}
+
+.auto-fill-field:focus {
+    background-color: #d4edda !important;
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+.calculated-field {
+    background-color: #fff3cd !important;
+    border-color: #ffc107 !important;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.calculated-field:focus {
+    background-color: #ffeaa7 !important;
+    border-color: #ffc107 !important;
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25) !important;
+}
+
+#id_importe_final {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+#id_importe_final:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 193, 7, 0.25);
+}
+
+/* Estilo para cuando hay descuento aplicado */
+#id_importe_final.has-discount {
+    background-color: #f8d7da !important;
+    border-color: #dc3545 !important;
+    color: #721c24 !important;
+}
+</style>
+{% endblock %} 

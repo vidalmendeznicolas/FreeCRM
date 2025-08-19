@@ -1,0 +1,222 @@
+{% extends 'gestion/base_gestion.html' %}
+{% load static %}
+
+{% block title %}Gestión de Pagos{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'gestion:inicio' %}">Inicio</a></li>
+<li class="breadcrumb-item active" aria-current="page">Pagos</li>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid fade-in">
+          <!-- Alumnos Pendientes de Pago -->
+        {% if alumnos_pendientes %}
+        <div class="card mb-3">
+          <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0"><i class="fa fa-exclamation-triangle me-2"></i>Alumnos Pendientes de Pago ({{ mes_actual }}/{{ año_actual }})</h5>
+          </div>
+          <div class="card-body">
+            <div class="alert alert-warning">
+              <i class="fa fa-info-circle me-2"></i>
+              Los siguientes alumnos están activos pero no tienen registros de pago en el mes actual.
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Alumno</th>
+                    <th>DNI</th>
+                    <th>Teléfono</th>
+                    <th>Último Pago</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for item in alumnos_pendientes %}
+                  <tr>
+                    <td>
+                      <div class="d-flex align-items-center">
+                        <div class="avatar-sm me-2">
+                          <i class="fa fa-user-circle fa-lg text-warning"></i>
+                        </div>
+                        <div>
+                          <strong>{{ item.alumno.nombre }} {{ item.alumno.apellido }}</strong>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ item.alumno.dni }}</td>
+                    <td>{{ item.alumno.telefono|default:"No especificado" }}</td>
+                    <td>
+                      {% if item.ultimo_pago %}
+                        <small>{{ item.ultimo_pago.fecha|date:"d/m/Y" }}</small>
+                        <br>
+                        <small class="text-muted">{{ item.ultimo_pago.importe_final }} €</small>
+                      {% else %}
+                        <small class="text-muted">Sin pagos</small>
+                      {% endif %}
+                    </td>
+                    <td>
+                      <div class="btn-group btn-group-sm">
+                        <a href="/admin/gestion/pago/add/?alumno={{ item.alumno.id }}&_redirect={{ request.path|urlencode }}" class="btn btn-outline-success" title="Añadir pago">
+                          <i class="fa fa-plus"></i>
+                        </a>
+                        <a href="{% url 'gestion:detalle_alumno' item.alumno.id %}" class="btn btn-outline-primary" title="Ver alumno">
+                          <i class="fa fa-eye"></i>
+                        </a>
+                      </div>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+
+        <div class="row g-3 mb-3">
+          <div class="col-lg-3">
+            <div class="card stats-card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">Total hoy ({{ fecha_hoy }})</h6>
+                    <h3 class="mb-0">{{ total_hoy }} €</h3>
+                  </div>
+                  <i class="fa fa-calendar-day fa-2x"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="card stats-card bg-primary">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">Total filtrado</h6>
+                    <h3 class="mb-0">{{ total_filtrado }} €</h3>
+                  </div>
+                  <i class="fa fa-filter fa-2x"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="card stats-card bg-secondary">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">Total general</h6>
+                    <h3 class="mb-0">{{ total_general_all }} €</h3>
+                  </div>
+                  <i class="fa fa-coins fa-2x"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-3">
+            <div class="card stats-card bg-warning">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-1">Pendientes</h6>
+                    <h3 class="mb-0">{{ alumnos_pendientes|length }}</h3>
+                    <small>Alumnos sin pago</small>
+                  </div>
+                  <i class="fa fa-exclamation-triangle fa-2x"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+  <div class="card mb-3">
+    <div class="card-header bg-white">
+      <i class="fa fa-search me-2"></i> Filtros
+    </div>
+    <div class="card-body">
+      <form method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label">Buscar</label>
+          <input type="text" name="q" value="{{ filters.q }}" placeholder="Número, alumno, profesor, concepto" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Desde</label>
+          <input type="date" name="desde" value="{{ filters.desde }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Hasta</label>
+          <input type="date" name="hasta" value="{{ filters.hasta }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Importe mín.</label>
+          <input type="number" step="0.01" name="imp_min" value="{{ filters.imp_min }}" class="form-control">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">Importe máx.</label>
+          <input type="number" step="0.01" name="imp_max" value="{{ filters.imp_max }}" class="form-control">
+        </div>
+        <div class="col-md-1 d-grid">
+          <button class="btn btn-primary"><i class="fa fa-filter"></i></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+            <div class="card table-gestion">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+              <span><i class="fa fa-receipt me-2"></i> Pagos</span>
+              <div class="d-flex align-items-center gap-2">
+                <a href="/admin/gestion/pago/add/?_redirect={{ request.path|urlencode }}" class="btn btn-success btn-sm">
+                  <i class="fa fa-plus"></i> Nuevo Pago
+                </a>
+                <small class="text-muted">{{ pagos|length }} registros</small>
+              </div>
+            </div>
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fecha</th>
+            <th>Alumno</th>
+            <th>Profesor</th>
+            <th>Concepto</th>
+            <th class="text-end">Importe</th>
+            <th>Comprobante</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in pagos %}
+          <tr>
+            <td>{{ p.numero }}</td>
+            <td>{{ p.fecha }}</td>
+            <td>{{ p.alumno }}</td>
+            <td>{% if p.profesor %}{{ p.profesor }}{% else %}-{% endif %}</td>
+            <td>{{ p.concepto }}</td>
+                                <td class="text-end">{{ p.importe_final }} €</td>
+                                <td>
+                      <div class="btn-group btn-group-sm">
+                        {% if p.comprobante %}
+                          <a href="{{ p.comprobante.url }}" target="_blank" class="btn btn-outline-primary" title="Ver PDF">
+                            <i class="fa fa-file-pdf"></i>
+                          </a>
+                        {% else %}
+                          <span class="badge bg-secondary">No PDF</span>
+                        {% endif %}
+                        <a href="/admin/gestion/pago/{{ p.id }}/change/?_redirect={{ request.path|urlencode }}" class="btn btn-outline-secondary" title="Editar pago">
+                          <i class="fa fa-edit"></i>
+                        </a>
+                      </div>
+                    </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center text-muted py-4">No hay pagos para los filtros actuales.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %} 
