@@ -303,6 +303,12 @@ p {
     padding: 0.5rem;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+#mainNav .navbar-toggler:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
 }
 
 #mainNav .navbar-toggler:focus {
@@ -312,6 +318,16 @@ p {
 
 #mainNav .navbar-toggler-icon {
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    transition: all 0.3s ease;
+}
+
+/* Navbar collapse animation */
+#mainNav .navbar-collapse {
+    transition: all 0.3s ease;
+}
+
+#mainNav .navbar-collapse.collapsing {
+    transition: all 0.3s ease;
 }
 
 /* Responsive adjustments */
@@ -319,16 +335,147 @@ p {
     #mainNav .navbar-nav {
         text-align: center;
         margin-top: 1rem;
+        padding: 1rem 0;
+    }
+    
+    #mainNav .navbar-nav .nav-item {
+        margin: 0.5rem 0;
     }
     
     #mainNav .navbar-nav .nav-item .nav-link {
         margin: 0.25rem 0;
         justify-content: center;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    #mainNav .navbar-nav .nav-item .nav-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateX(5px);
     }
     
     #mainNav .login-btn {
         margin: 0.5rem auto;
         width: fit-content;
+        display: block;
+    }
+    
+    /* Asegurar que el menú colapsado tenga un fondo */
+    #mainNav .navbar-collapse {
+        background: rgba(102, 126, 234, 0.98);
+        border-radius: 8px;
+        margin-top: 0.5rem;
+        padding: 0.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+}
+
+/* Estilos específicos para dispositivos móviles muy pequeños */
+@media (max-width: 576px) {
+    #mainNav .navbar-brand {
+        font-size: 1.3rem;
+    }
+    
+    #mainNav .navbar-brand i {
+        font-size: 1.5rem;
+    }
+    
+    #mainNav .navbar-nav .nav-item .nav-link {
+        font-size: 0.95rem;
+        padding: 0.6rem 0.8rem;
+    }
+    
+    #mainNav .navbar-nav .nav-item .nav-link i {
+        font-size: 0.8rem;
+    }
+}
+
+/* Mejoras adicionales para el menú hamburguesa */
+@media (max-width: 991.98px) {
+    /* Asegurar que el menú hamburguesa sea más visible */
+    #mainNav .navbar-toggler {
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        padding: 0.6rem;
+    }
+    
+    #mainNav .navbar-toggler:hover {
+        border-color: rgba(255, 255, 255, 0.6);
+        background: rgba(255, 255, 255, 0.15);
+    }
+    
+    /* Mejorar la animación del icono hamburguesa */
+    #mainNav .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+        transform: rotate(90deg);
+    }
+    
+    /* Añadir un indicador visual cuando el menú está abierto */
+    #mainNav .navbar-collapse.show {
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    /* Mejorar el espaciado de los elementos del menú */
+    #mainNav .navbar-nav .nav-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin: 0;
+    }
+    
+    #mainNav .navbar-nav .nav-item:last-child {
+        border-bottom: none;
+    }
+    
+    #mainNav .navbar-nav .nav-item .nav-link {
+        border-radius: 0;
+        margin: 0;
+        padding: 1rem;
+    }
+    
+    /* Estilo especial para el botón de login en móvil */
+    #mainNav .login-btn {
+        margin: 1rem auto;
+        width: 80%;
+        text-align: center;
+        border-radius: 25px;
+        background: rgba(255, 255, 255, 0.2);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    #mainNav .login-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: translateY(-2px);
+    }
+}
+
+/* Animación para el menú desplegable */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mejorar la accesibilidad del menú hamburguesa */
+#mainNav .navbar-toggler:focus {
+    box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+}
+
+/* Asegurar que el menú sea completamente funcional en todos los dispositivos */
+@media (max-width: 767px) {
+    #mainNav .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: rgba(102, 126, 234, 0.98);
+        backdrop-filter: blur(10px);
+        border-radius: 0 0 8px 8px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     }
 }
 
@@ -575,7 +722,7 @@ ul.errorlist{
 .services-section {
     padding: 5rem 0;
     /*background: #395aac8e;*/
-    background: linear-gradient(135deg, #395aac8e 0%, #e9ecef 100%); (gris sutil)
+    background: linear-gradient(135deg, #395aac8e 0%, #e9ecef 100%);
 }
 
 .section-header {

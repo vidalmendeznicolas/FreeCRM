@@ -158,6 +158,44 @@
     <!-- Bootstrap -->
     <script src="{% static 'proyectoWebApp/vendor/jquery/jquery.min.js' %}"></script>
     <script src="{% static 'proyectoWebApp/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    
+    <!-- Custom Navbar JavaScript -->
+    <script src="{% static 'proyectoWebApp/js/navbar.js' %}"></script>
+    
+    <!-- Debug script for hamburger menu -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug: Page loaded');
+            
+            const toggler = document.querySelector('.navbar-toggler');
+            const collapse = document.querySelector('.navbar-collapse');
+            
+            console.log('Debug: Toggler found:', toggler);
+            console.log('Debug: Collapse found:', collapse);
+            console.log('Debug: Bootstrap loaded:', typeof bootstrap !== 'undefined');
+            
+            if (toggler) {
+                console.log('Debug: Toggler styles:', {
+                    display: getComputedStyle(toggler).display,
+                    visibility: getComputedStyle(toggler).visibility,
+                    opacity: getComputedStyle(toggler).opacity
+                });
+                
+                // Monitor menu state changes
+                const observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                            console.log('Debug: Menu class changed:', collapse.classList.contains('show'));
+                        }
+                    });
+                });
+                
+                if (collapse) {
+                    observer.observe(collapse, { attributes: true });
+                }
+            }
+        });
+    </script>
 
 
 
